@@ -3,101 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOA Community Ideas</title>
+    <title>Montgomery Woods Community Ideas</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .idea-card { transition: all 0.2s ease; }
-        .idea-card:hover { transform: translateY(-2px); }
-        .vote-btn { transition: all 0.1s ease; }
-        .vote-btn:active { transform: scale(0.9); }
+        :root {
+            --mw-green: #1a3c2e;
+            --mw-cream: #f9f5e8;
+            --mw-gold: #c5a059;
+        }
+        body { 
+            background: linear-gradient(135deg, #fdfbf1 0%, #f1ede0 100%);
+            font-family: 'Inter', sans-serif;
+            color: #2d3748;
+        }
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+        .bg-mw-green { background-color: var(--mw-green); }
+        .text-mw-green { color: var(--mw-green); }
+        .border-mw-green { border-color: var(--mw-green); }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(26, 60, 46, 0.1);
+        }
+        .idea-card {
+            background: #fffcf4;
+            border: 1px solid #e9e2d0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease;
+        }
+        .idea-card:hover { transform: translateY(-3px); }
+        .vote-btn { color: var(--mw-gold); opacity: 0.6; transition: all 0.2s; }
+        .vote-btn:hover { opacity: 1; transform: scale(1.1); }
+        .vote-active { opacity: 1; color: var(--mw-green); }
+        
         [v-cloak] { display: none; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
-    <div id="app" v-cloak class="max-w-3xl mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="mb-10 text-center">
-            <h1 class="text-4xl font-bold text-slate-900 mb-2">Community Ideas</h1>
-            <p class="text-slate-600">Share and vote on improvements for our HOA</p>
+<body class="min-h-screen py-12">
+    <div id="app" v-cloak class="max-w-4xl mx-auto px-6">
+        
+        <!-- Montgomery Woods Branding -->
+        <header class="flex flex-col items-center mb-12 text-center">
+            <div class="mb-4 flex items-center gap-4">
+                <!-- Placeholder for MWCA Logo -->
+                <div class="w-20 h-20 bg-mw-green rounded-lg flex items-center justify-center text-white p-2 shadow-lg">
+                    <span class="text-xs font-bold text-center">MWCA LOGO</span>
+                </div>
+                <div class="text-left">
+                    <h2 class="text-2xl font-bold text-mw-green leading-tight">Montgomery Woods</h2>
+                    <p class="text-xs tracking-widest uppercase text-mw-green opacity-70">Community Association</p>
+                </div>
+            </div>
+            <h1 class="text-5xl text-mw-green mb-3">Community Ideas</h1>
+            <p class="text-slate-600 italic">Share and vote on improvements for our community</p>
         </header>
 
-        <!-- Post Idea Form -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-10">
-            <h2 class="text-xl font-semibold mb-4">Post a New Idea</h2>
-            <form @submit.prevent="postIdea" class="space-y-4">
-                <div>
-                    <input v-model="newIdea.title" type="text" placeholder="Idea title (e.g., New pool furniture)" 
-                           class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>
-                </div>
-                <div>
-                    <textarea v-model="newIdea.description" placeholder="Details (optional)" rows="3"
-                              class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-4 items-center">
-                    <input v-model="newIdea.author" type="text" placeholder="Your name (optional)" 
-                           class="w-full sm:w-auto flex-1 px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+        <!-- Post Idea Section -->
+        <section class="glass-card rounded-2xl p-8 mb-12 border-mw-green border-t-4 shadow-xl">
+            <h2 class="text-2xl font-bold text-mw-green mb-6">Post a New Idea</h2>
+            <form @submit.prevent="postIdea" class="space-y-5">
+                <input v-model="newIdea.title" type="text" placeholder="Idea title (e.g., Trail marker restoration)" 
+                       class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-white shadow-inner focus:ring-2 focus:ring-mw-green outline-none" required>
+                
+                <textarea v-model="newIdea.description" placeholder="Details (How will this benefit our neighborhood?)" rows="3"
+                          class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-white shadow-inner focus:ring-2 focus:ring-mw-green outline-none"></textarea>
+                
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <input v-model="newIdea.author" type="text" placeholder="Your Name (Optional)" 
+                           class="w-full md:w-auto flex-1 px-5 py-3 rounded-xl border border-slate-200 bg-white shadow-inner outline-none">
                     <button type="submit" :disabled="submitting" 
-                            class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg disabled:opacity-50">
-                        {{ submitting ? 'Posting...' : 'Post Idea' }}
+                            class="w-full md:w-auto bg-mw-green hover:bg-emerald-900 text-white font-bold px-10 py-3 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50">
+                        {{ submitting ? 'POSTING...' : 'POST IDEA' }}
                     </button>
                 </div>
-                <p v-if="error" class="text-red-500 text-sm mt-2">⚠️ {{ error }}</p>
+                <p v-if="error" class="text-red-600 text-sm font-medium">⚠️ {{ error }}</p>
             </form>
         </section>
 
-        <!-- Filters & Sorting -->
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-slate-800">{{ sortedIdeas.length }} Ideas</h2>
-            <select v-model="sortBy" class="bg-transparent font-medium text-slate-600 outline-none cursor-pointer">
-                <option value="top">Sort by: Top Rated</option>
-                <option value="newest">Sort by: Newest</option>
-                <option value="oldest">Sort by: Oldest</option>
-            </select>
+        <!-- Feed Controls -->
+        <div class="flex flex-col sm:flex-row justify-between items-end sm:items-center mb-8 gap-4">
+            <h2 class="text-3xl font-bold text-mw-green">{{ sortedIdeas.length }} Proposals</h2>
+            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
+                <span class="text-xs font-bold uppercase text-slate-400">Sort By</span>
+                <select v-model="sortBy" class="text-sm font-semibold text-mw-green outline-none bg-transparent cursor-pointer">
+                    <option value="top">Top Rated</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                </select>
+            </div>
         </div>
 
-        <!-- Ideas List -->
-        <div class="space-y-4">
+        <!-- Ideas Feed -->
+        <div class="grid gap-6">
             <div v-for="(idea, index) in sortedIdeas" :key="idea.id" 
-                 class="idea-card bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex gap-4">
+                 class="idea-card p-6 rounded-2xl flex gap-6 items-center">
                 
-                <!-- Vote Column -->
-                <div class="flex flex-col items-center gap-1 min-w-[40px]">
+                <!-- Refined Voting UI -->
+                <div class="flex flex-col items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm min-w-[70px]">
                     <button @click="vote(idea.id, 1)" 
-                            :class="getUserVote(idea.id) === 1 ? 'text-orange-500' : 'text-slate-400 hover:text-slate-600'"
-                            class="vote-btn p-1">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>
+                            :class="getUserVote(idea.id) === 1 ? 'vote-active' : ''"
+                            class="vote-btn">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
                     </button>
-                    <span class="font-bold text-lg" :class="{'text-orange-600': (idea.upvotes - idea.downvotes) > 0}">
-                        {{ idea.upvotes - idea.downvotes }}
-                    </span>
+                    <span class="text-xl font-bold text-mw-green my-1">{{ idea.upvotes - idea.downvotes }}</span>
                     <button @click="vote(idea.id, -1)" 
-                            :class="getUserVote(idea.id) === -1 ? 'text-blue-500' : 'text-slate-400 hover:text-slate-600'"
-                            class="vote-btn p-1">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
+                            :class="getUserVote(idea.id) === -1 ? 'vote-active' : ''"
+                            class="vote-btn">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                 </div>
 
-                <!-- Content Column -->
+                <!-- Idea Details -->
                 <div class="flex-1">
-                    <div class="flex items-start justify-between gap-2 mb-1">
-                        <h3 class="text-lg font-bold leading-tight">{{ idea.title }}</h3>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-xl font-bold text-mw-green">{{ idea.title }}</h3>
                         <span v-if="index === 0 && sortBy === 'top' && (idea.upvotes - idea.downvotes) > 0" 
-                              class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
-                            ★ Top Notion
+                              class="bg-mw-green text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full">
+                            Top Rated
                         </span>
                     </div>
-                    <p class="text-slate-600 mb-3 whitespace-pre-wrap">{{ idea.description }}</p>
-                    <div class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="font-medium text-slate-500">{{ idea.author || 'Anonymous' }}</span>
-                        <span>•</span>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">{{ idea.description }}</p>
+                    <div class="flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <span class="text-mw-green opacity-80">{{ idea.author || 'Anonymous Resident' }}</span>
+                        <span class="text-slate-200">|</span>
                         <span>{{ formatDate(idea.created_at) }}</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Empty State -->
-            <div v-if="ideas.length === 0 && !loading" class="text-center py-20 bg-white rounded-xl border-2 border-dashed border-slate-200">
-                <p class="text-slate-400">No ideas yet. Be the first to post!</p>
             </div>
         </div>
     </div>
@@ -129,20 +162,18 @@
                 const fetchIdeas = async () => {
                     try {
                         const response = await fetch(`${SUPABASE_URL}/rest/v1/ideas?select=*`, { headers });
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        ideas.ref = await response.json();
-                        ideas.value = ideas.ref;
+                        if (!response.ok) throw new Error('DB Connection Failed');
+                        ideas.value = await response.json();
                     } catch (err) {
-                        error.value = "Couldn't connect to the database.";
-                        console.error(err);
+                        error.value = "Database connection offline.";
                     } finally {
-                        loading.ref = false;
+                        loading.value = false;
                     }
                 };
 
                 const postIdea = async () => {
+                    if (!newIdea.value.title) return;
                     submitting.value = true;
-                    error.value = null;
                     try {
                         const response = await fetch(`${SUPABASE_URL}/rest/v1/ideas`, {
                             method: 'POST',
@@ -151,15 +182,14 @@
                                 title: newIdea.value.title,
                                 description: newIdea.value.description,
                                 author: newIdea.value.author,
-                                upvotes: 0,
-                                downvotes: 0
+                                upvotes: 0, downvotes: 0
                             })
                         });
-                        if (!response.ok) throw new Error('Failed to post');
+                        if (!response.ok) throw new Error('Post failed');
                         newIdea.value = { title: '', description: '', author: '' };
                         await fetchIdeas();
                     } catch (err) {
-                        error.value = "Failed to post. Check your connection.";
+                        error.value = "Submission failed.";
                     } finally {
                         submitting.value = false;
                     }
@@ -167,8 +197,7 @@
 
                 const vote = async (id, direction) => {
                     const currentVote = userVotes.value[id] || 0;
-                    let newUpStep = 0;
-                    let newDownStep = 0;
+                    let newUpStep = 0, newDownStep = 0;
 
                     if (currentVote === direction) {
                         direction === 1 ? newUpStep = -1 : newDownStep = -1;
@@ -181,7 +210,6 @@
                     }
 
                     localStorage.setItem('hoa_votes', JSON.stringify(userVotes.value));
-                    
                     const idea = ideas.value.find(i => i.id === id);
                     const newUp = Math.max(0, (idea.upvotes || 0) + newUpStep);
                     const newDown = Math.max(0, (idea.downvotes || 0) + newDownStep);
@@ -194,9 +222,7 @@
                         });
                         idea.upvotes = newUp;
                         idea.downvotes = newDown;
-                    } catch (err) {
-                        console.error("Vote failed to sync");
-                    }
+                    } catch (err) { console.error("Vote failed"); }
                 };
 
                 const sortedIdeas = computed(() => {
@@ -208,7 +234,7 @@
                 });
 
                 const formatDate = (dateStr) => {
-                    return new Date(dateStr).toLocaleDateString(undefined, { 
+                    return new Date(dateStr).toLocaleDateString('en-US', { 
                         month: 'short', day: 'numeric', year: 'numeric' 
                     });
                 };
