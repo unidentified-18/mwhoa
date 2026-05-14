@@ -68,7 +68,6 @@
             <!-- Main Feed -->
             <main class="lg:w-2/3">
                 <section class="bg-white rounded-2xl p-8 mb-12 shadow-xl border-t-4 border-mw-green relative">
-                    <!-- New Intro Text -->
                     <div class="mb-8 border-b border-slate-100 pb-6">
                         <h2 class="text-2xl font-bold text-mw-green mb-3">Welcome to the Montgomery Woods Idea Board.</h2>
                         <p class="text-sm text-slate-600 leading-relaxed">
@@ -106,8 +105,16 @@
                     </form>
                 </section>
 
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-mw-green">{{ totalIdeas }} Resident Ideas</h2>
+                    <select v-model="sortBy" @change="currentPage = 1" class="text-sm font-semibold text-mw-green outline-none bg-white px-4 py-2 rounded-full border border-slate-200">
+                        <option value="top">Sort: Top Rated</option>
+                        <option value="newest">Sort: Newest</option>
+                    </select>
+                </div>
+
                 <div class="space-y-6">
-                    <div v-for="idea in sortedIdeas" :key="idea.id" class="idea-card p-6 rounded-2xl flex gap-6 relative shadow-sm">
+                    <div v-for="idea in paginatedIdeas" :key="idea.id" class="idea-card p-6 rounded-2xl flex gap-6 relative shadow-sm">
                         <div class="flex flex-col items-center bg-white p-2 rounded-xl border border-slate-100 min-w-[60px] h-fit">
                             <button @click="vote(idea.id, 1)" :class="{ 'vote-active': getUserVote(idea.id) === 1 }" class="opacity-30 hover:opacity-100 transition-all text-mw-green">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg>
@@ -144,6 +151,13 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Pagination Controls -->
+                <div v-if="totalPages > 1" class="mt-12 flex justify-center items-center gap-6 pb-12">
+                    <button @click="currentPage--" :disabled="currentPage === 1" class="bg-white border border-slate-200 px-6 py-2 rounded-xl text-sm font-bold text-mw-green disabled:opacity-30">Previous</button>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Page {{ currentPage }} of {{ totalPages }}</span>
+                    <button @click="currentPage++" :disabled="currentPage === totalPages" class="bg-white border border-slate-200 px-6 py-2 rounded-xl text-sm font-bold text-mw-green disabled:opacity-30">Next</button>
+                </div>
             </main>
         </div>
     </div>
@@ -167,6 +181,9 @@
                 const userVotes = ref(JSON.parse(localStorage.getItem('hoa_votes') || '{}'));
                 const newIdea = ref({ title: '', description: '', author: '', category: '' });
                 const statuses = ['Under Board Review', 'Budgeting Phase', 'Planned', 'Completed'];
+                
+                const currentPage = ref(1);
+                const perPage = 10;
 
                 const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
@@ -184,6 +201,7 @@
                     setTimeout(() => showSuccess.value = false, 4000);
                     fetchIdeas();
                     submitting.value = false;
+                    currentPage.value = 1;
                 };
 
                 const updateStatus = async (id, status) => {
@@ -225,12 +243,26 @@
                     }
                 };
 
-                const sortedIdeas = computed(() => [...ideas.value].sort((a,b) => ((b.upvotes||0)-(b.downvotes||0)) - ((a.upvotes||0)-(a.downvotes||0))));
+                const sortBy = ref('top');
+                const sortedIdeas = computed(() => {
+                    return [...ideas.value].sort((a,b) => {
+                        if(sortBy.value === 'top') return ((b.upvotes||0)-(b.downvotes||0)) - ((a.upvotes||0)-(a.downvotes||0));
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    });
+                });
+
+                const totalIdeas = computed(() => ideas.value.length);
+                const totalPages = computed(() => Math.ceil(totalIdeas.value / perPage));
+                const paginatedIdeas = computed(() => {
+                    const start = (currentPage.value - 1) * perPage;
+                    return sortedIdeas.value.slice(start, start + perPage);
+                });
+
                 const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const getUserVote = (id) => userVotes.value[id] || 0;
 
                 onMounted(() => { if(isAuthenticated.value) fetchIdeas(); setInterval(fetchIdeas, 30000); });
-                return { ideas, submitting, newIdea, sortedIdeas, postIdea, vote, getUserVote, formatDate, isAdmin, isAuthenticated, passInput, passError, checkPass, deleteIdea, statuses, updateStatus, getStatusClass, showSuccess };
+                return { ideas, submitting, newIdea, sortedIdeas, postIdea, vote, getUserVote, formatDate, isAdmin, isAuthenticated, passInput, passError, checkPass, deleteIdea, statuses, updateStatus, getStatusClass, showSuccess, currentPage, totalPages, paginatedIdeas, totalIdeas, sortBy };
             }
         }).mount('#app');
     </script>
