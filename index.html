@@ -4,99 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>MWCA Community Board</title>
+    <title>MWCA Resident Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --mw-green: #1a3c2e; --mw-cream: #fdfbf1; }
+        :root { --mw-green: #1a3c2e; --mw-cream: #fdfbf1; --mw-gold: #c5a059; }
         body { background: var(--mw-cream); font-family: 'Inter', sans-serif; color: #2d3748; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
         .idea-card { background: #fffcf4; border: 1px solid #e9e2d0; }
-        .vote-active { color: var(--mw-green); opacity: 1 !important; transform: scale(1.2); }
+        .status-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .category-tag { background: #f1ede0; color: #7a7362; font-size: 10px; font-weight: 700; }
         [v-cloak] { display: none; }
-        .logo-img { mix-blend-mode: multiply; max-height: 140px; }
-        .btn-primary { background-color: var(--mw-green); transition: all 0.2s ease; }
-        .btn-primary:hover { background-color: #0e2a1f; transform: translateY(-1px); }
+        .logo-img { mix-blend-mode: multiply; max-height: 120px; }
     </style>
 </head>
 <body class="min-h-screen">
     <div id="app" v-cloak>
         
-        <!-- Updated Access Gate -->
-        <div v-if="!isAuthenticated" class="min-h-screen flex flex-col items-center justify-center px-6 py-12 text-center">
-            <div class="bg-white p-10 rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full">
-                <img src="logo.jpg" alt="Montgomery Woods Logo" class="logo-img mx-auto mb-8">
-                <h2 class="text-3xl font-bold text-mw-green mb-4">Resident Access</h2>
-                <p class="mb-8 text-slate-500 text-sm leading-relaxed">Please enter the community access code provided in the HOA newsletter to view the board.</p>
-                
-                <div class="space-y-4">
-                    <input v-model="passInput" 
-                           @keyup.enter="checkPass"
-                           type="password" 
-                           placeholder="Access Code" 
-                           class="w-full px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-mw-green text-center text-lg tracking-widest">
-                    
-                    <button @click="checkPass" 
-                            class="w-full btn-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg">
-                        Enter Portal
-                    </button>
-                </div>
-                
-                <p v-if="passError" class="text-red-600 mt-6 text-sm font-bold animate-pulse">Invalid access code. Please try again.</p>
+        <!-- Access Gate -->
+        <div v-if="!isAuthenticated" class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+            <div class="bg-white p-10 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100">
+                <img src="logo.jpg" alt="Logo" class="logo-img mx-auto mb-6">
+                <h2 class="text-2xl font-bold text-mw-green mb-6">Resident Access</h2>
+                <input v-model="passInput" @keyup.enter="checkPass" type="password" placeholder="Access Code" class="w-full px-5 py-3 rounded-xl border mb-4 text-center text-lg tracking-widest outline-none focus:ring-2 focus:ring-mw-green">
+                <button @click="checkPass" class="w-full bg-mw-green text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-900 transition-all">Enter Portal</button>
+                <p v-if="passError" class="text-red-600 mt-4 text-sm font-bold">Invalid Code</p>
             </div>
-            <p class="mt-8 text-slate-400 text-xs uppercase tracking-widest">Montgomery Woods Community Association</p>
         </div>
 
-        <!-- Main Content -->
-        <div v-else class="max-w-4xl mx-auto px-6 py-12">
-            <header class="flex flex-col items-center mb-12 text-center">
-                <img src="logo.jpg" alt="Montgomery Woods Logo" class="logo-img mb-6">
-                <h1 class="text-4xl text-mw-green mb-2">Community Ideas Board</h1>
-                <p class="text-slate-600 italic">A private space for residents to shape our neighborhood</p>
-                <div v-if="isAdmin" class="mt-4 bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-amber-200">Board Member / Admin Mode</div>
-            </header>
-
-            <!-- Submit Form -->
-            <section class="bg-white rounded-2xl p-8 mb-12 shadow-xl border-t-4 border-mw-green">
-                <h2 class="text-2xl font-bold text-mw-green mb-6">Submit a Proposal</h2>
-                <form @submit.prevent="postIdea" class="space-y-4">
-                    <input v-model="newIdea.title" type="text" placeholder="Idea Title (e.g., Tennis Court Resurfacing)" class="w-full px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-mw-green shadow-sm" required>
-                    <textarea v-model="newIdea.description" placeholder="Describe your suggestion and its benefits..." rows="3" class="w-full px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-mw-green shadow-sm"></textarea>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <input v-model="newIdea.author" type="text" placeholder="Your Name (Optional)" class="flex-1 px-5 py-3 rounded-xl border border-slate-200 outline-none shadow-sm">
-                        <button type="submit" :disabled="submitting" class="btn-primary text-white font-bold px-12 py-3 rounded-xl transition-all shadow-md">
-                            {{ submitting ? 'Submitting...' : 'Post Idea' }}
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Feed -->
-            <div class="grid gap-6">
-                <div v-for="idea in sortedIdeas" :key="idea.id" class="idea-card p-6 rounded-2xl flex gap-6 items-center relative shadow-sm">
-                    <div class="flex flex-col items-center bg-white p-2 rounded-xl border border-slate-100 min-w-[65px] shadow-inner">
-                        <button @click="vote(idea.id, 1)" :class="{ 'vote-active': getUserVote(idea.id) === 1 }" class="opacity-30 hover:opacity-100 transition-all">
-                            <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg>
-                        </button>
-                        <span class="text-xl font-bold text-mw-green">{{ idea.upvotes - idea.downvotes }}</span>
-                        <button @click="vote(idea.id, -1)" :class="{ 'vote-active': getUserVote(idea.id) === -1 }" class="opacity-30 hover:opacity-100 transition-all">
-                            <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-                        </button>
+        <!-- Main Portal -->
+        <div v-else class="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12">
+            
+            <!-- Left Sidebar: Guidelines & Info -->
+            <aside class="lg:w-1/3 space-y-8">
+                <div class="sticky top-12">
+                    <img src="logo.jpg" alt="Logo" class="logo-img mb-6">
+                    <h1 class="text-3xl text-mw-green mb-4">Community Board</h1>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+                        <h3 class="font-bold text-mw-green mb-3 uppercase text-xs tracking-wider text-mw-green">Community Guidelines</h3>
+                        <ul class="text-sm text-slate-600 space-y-3 leading-relaxed">
+                            <li>• Suggestions must pertain to Montgomery Woods common areas.</li>
+                            <li>• No personal grievances or neighbor disputes.</li>
+                            <li>• All ideas are subject to HOA Board review and 2026 financial assessments.</li>
+                            <li>• Keep discussions constructive and neighborly.</li>
+                        </ul>
                     </div>
 
-                    <div class="flex-1">
-                        <h3 class="text-xl font-bold text-mw-green mb-1">{{ idea.title }}</h3>
-                        <p class="text-slate-600 text-sm mb-3 leading-relaxed">{{ idea.description }}</p>
-                        <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400">
-                            {{ idea.author || 'Anonymous Resident' }} • {{ formatDate(idea.created_at) }}
-                        </div>
+                    <div class="p-6 bg-mw-green rounded-2xl text-white shadow-lg">
+                        <h3 class="font-bold mb-2 text-sm uppercase tracking-wider">Budgeting Context</h3>
+                        <p class="text-xs opacity-80 leading-relaxed">
+                            Projects are evaluated based on the current tax year financial planning and Montgomery Woods community priorities.
+                        </p>
                     </div>
-
-                    <button v-if="isAdmin" @click="deleteIdea(idea.id)" class="absolute top-4 right-4 text-slate-300 hover:text-red-600 transition-colors">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/></svg>
-                    </button>
                 </div>
-            </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="lg:w-2/3">
+                <!-- Submit Form -->
+                <section class="bg-white rounded-2xl p-8 mb-12 shadow-xl border-t-4 border-mw-green">
+                    <h2 class="text-xl font-bold text-mw-green mb-6">Submit a Proposal</h2>
+                    <form @submit.prevent="postIdea" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input v-model="newIdea.title" type="text" placeholder="Title" class="px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-mw-green shadow-sm" required>
+                            <select v-model="newIdea.category" class="px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-mw-green shadow-sm" required>
+                                <option value="" disabled>Select Category</option>
+                                <option value="Landscaping & Trails">Landscaping & Trails</option>
+                                <option value="Safety & Lighting">Safety & Lighting</option>
+                                <option value="Social Events">Social Events</option>
+                                <option value="Maintenance & Repairs">Maintenance & Repairs</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <textarea v-model="newIdea.description" placeholder="Describe your suggestion..." rows="2" class="w-full px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-mw-green shadow-sm"></textarea>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <input v-model="newIdea.author" type="text" placeholder="Your Name (Optional)" class="flex-1 px-5 py-3 rounded-xl border border-slate-200 outline-none shadow-sm">
+                            <button type="submit" :disabled="submitting" class="bg-mw-green text-white font-bold px-12 py-3 rounded-xl shadow-md">Post Idea</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Ideas Feed -->
+                <div class="space-y-6">
+                    <div v-for="idea in sortedIdeas" :key="idea.id" class="idea-card p-6 rounded-2xl flex gap-6 relative shadow-sm">
+                        <!-- Voting -->
+                        <div class="flex flex-col items-center bg-white p-2 rounded-xl border border-slate-100 min-w-[60px] h-fit">
+                            <button @click="vote(idea.id, 1)" :class="{ 'vote-active': getUserVote(idea.id) === 1 }" class="opacity-30 hover:opacity-100 transition-all">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg>
+                            </button>
+                            <span class="text-xl font-bold text-mw-green">{{ idea.upvotes - idea.downvotes }}</span>
+                            <button @click="vote(idea.id, -1)" :class="{ 'vote-active': getUserVote(idea.id) === -1 }" class="opacity-30 hover:opacity-100 transition-all">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="flex-1">
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                <span class="category-tag px-2 py-1 rounded-md tracking-wider uppercase">{{ idea.category || 'Others' }}</span>
+                                <span :class="getStatusClass(idea.status)" class="status-badge px-2 py-1 rounded-md border">
+                                    {{ idea.status || 'Under Board Review' }}
+                                </span>
+                            </div>
+                            <h3 class="text-xl font-bold text-mw-green mb-1">{{ idea.title }}</h3>
+                            <p class="text-slate-600 text-sm mb-4">{{ idea.description }}</p>
+                            
+                            <!-- Admin Status Update -->
+                            <div v-if="isAdmin" class="mt-4 pt-4 border-t border-slate-100 flex gap-2 overflow-x-auto">
+                                <button v-for="status in statuses" @click="updateStatus(idea.id, status)" class="text-[9px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-500 hover:bg-mw-green hover:text-white transition-colors">
+                                    SET: {{ status }}
+                                </button>
+                            </div>
+
+                            <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-4">
+                                {{ idea.author || 'Anonymous Resident' }} • {{ formatDate(idea.created_at) }}
+                            </div>
+                        </div>
+
+                        <button v-if="isAdmin" @click="deleteIdea(idea.id)" class="absolute top-4 right-4 text-slate-300 hover:text-red-600">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
@@ -107,7 +137,7 @@
             setup() {
                 const SUPABASE_URL = 'https://sizisveskynuftyclzgb.supabase.co';
                 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpemlzdmVza3ludWZ0eWNsemdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTU0MzIsImV4cCI6MjA5MzkzMTQzMn0.v4eeorP97VcJP_GOizGdyoCJBRTVK4b06wJ7EEM1oFg';
-                const ACCESS_CODE = '08540'; 
+                const ACCESS_CODE = '08540';
 
                 const ideas = ref([]);
                 const submitting = ref(false);
@@ -116,35 +146,39 @@
                 const isAuthenticated = ref(sessionStorage.getItem('mw_auth') === 'true');
                 const isAdmin = ref(new URLSearchParams(window.location.search).get('admin') === 'true');
                 const userVotes = ref(JSON.parse(localStorage.getItem('hoa_votes') || '{}'));
-                const newIdea = ref({ title: '', description: '', author: '' });
+                const newIdea = ref({ title: '', description: '', author: '', category: '' });
+                const statuses = ['Under Board Review', 'Budgeting Phase', 'Planned', 'Completed'];
 
                 const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-                const checkPass = () => {
-                    if (passInput.value === ACCESS_CODE) {
-                        isAuthenticated.value = true;
-                        sessionStorage.setItem('mw_auth', 'true');
-                        fetchIdeas();
-                    } else {
-                        passError.value = true;
-                        passInput.value = '';
-                    }
-                };
-
                 const fetchIdeas = async () => {
-                    if (!isAuthenticated.value) return;
-                    try {
-                        const res = await fetch(`${SUPABASE_URL}/rest/v1/ideas?select=*`, { headers });
-                        ideas.value = await res.json();
-                    } catch (e) { console.error("Fetch error"); }
+                    const res = await fetch(`${SUPABASE_URL}/rest/v1/ideas?select=*`, { headers });
+                    ideas.value = await res.json();
                 };
 
                 const postIdea = async () => {
                     submitting.value = true;
                     await fetch(`${SUPABASE_URL}/rest/v1/ideas`, { method: 'POST', headers, body: JSON.stringify(newIdea.value) });
-                    newIdea.value = { title: '', description: '', author: '' };
+                    newIdea.value = { title: '', description: '', author: '', category: '' };
                     fetchIdeas();
                     submitting.value = false;
+                };
+
+                const updateStatus = async (id, status) => {
+                    await fetch(`${SUPABASE_URL}/rest/v1/ideas?id=eq.${id}`, { method: 'PATCH', headers, body: JSON.stringify({ status }) });
+                    fetchIdeas();
+                };
+
+                const getStatusClass = (status) => {
+                    if (status === 'Completed') return 'border-emerald-200 text-emerald-600 bg-emerald-50';
+                    if (status === 'Planned') return 'border-blue-200 text-blue-600 bg-blue-50';
+                    if (status === 'Budgeting Phase') return 'border-amber-200 text-amber-600 bg-amber-50';
+                    return 'border-slate-200 text-slate-500 bg-slate-50';
+                };
+
+                const checkPass = () => {
+                    if (passInput.value === ACCESS_CODE) { isAuthenticated.value = true; sessionStorage.setItem('mw_auth', 'true'); fetchIdeas(); }
+                    else { passError.value = true; }
                 };
 
                 const vote = async (id, direction) => {
@@ -155,7 +189,7 @@
                     const downDelta = direction === -1 ? 1 : (current === -1 ? -1 : 0);
                     await fetch(`${SUPABASE_URL}/rest/v1/ideas?id=eq.${id}`, {
                         method: 'PATCH', headers,
-                        body: JSON.stringify({ upvotes: idea.upvotes + upDelta, downvotes: idea.downvotes + downDelta })
+                        body: JSON.stringify({ upvotes: (idea.upvotes || 0) + upDelta, downvotes: (idea.downvotes || 0) + downDelta })
                     });
                     userVotes.value[id] = direction;
                     localStorage.setItem('hoa_votes', JSON.stringify(userVotes.value));
@@ -174,8 +208,7 @@
                 const getUserVote = (id) => userVotes.value[id] || 0;
 
                 onMounted(() => { if(isAuthenticated.value) fetchIdeas(); setInterval(fetchIdeas, 30000); });
-
-                return { ideas, submitting, newIdea, sortedIdeas, postIdea, vote, getUserVote, formatDate, isAdmin, isAuthenticated, passInput, passError, checkPass, deleteIdea };
+                return { ideas, submitting, newIdea, sortedIdeas, postIdea, vote, getUserVote, formatDate, isAdmin, isAuthenticated, passInput, passError, checkPass, deleteIdea, statuses, updateStatus, getStatusClass };
             }
         }).mount('#app');
     </script>
