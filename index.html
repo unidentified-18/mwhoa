@@ -68,7 +68,15 @@
             <!-- Main Feed -->
             <main class="lg:w-2/3">
                 <section class="bg-white rounded-2xl p-8 mb-12 shadow-xl border-t-4 border-mw-green relative">
-                    <h2 class="text-xl font-bold text-mw-green mb-6">Submit a Proposal</h2>
+                    <!-- New Intro Text -->
+                    <div class="mb-8 border-b border-slate-100 pb-6">
+                        <h2 class="text-2xl font-bold text-mw-green mb-3">Welcome to the Montgomery Woods Idea Board.</h2>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            This portal is designed to capture the collective creativity of our residents. Whether it’s a minor trail improvement, a new community social event, or a safety suggestion, your ideas help the HOA Board prioritize projects that enhance our neighborhood. Please share your vision below, and use your votes to help us identify the initiatives that matter most to our community.
+                        </p>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-mw-green mb-6">Submit an Idea to improve our community</h2>
                     
                     <transition name="fade">
                         <div v-if="showSuccess" class="absolute top-4 right-8 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-bold border border-emerald-200 shadow-sm">
@@ -127,7 +135,7 @@
                             </div>
 
                             <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-4">
-                                {{ idea.author || 'Anonymous Resident' }} • {{ formatDate(idea.created_at) }}
+                                {{ idea.author || 'Anonymous Resident' }} • Posted: {{ formatDate(idea.created_at) }}
                             </div>
                         </div>
 
